@@ -21,26 +21,50 @@ class Block(pygame.sprite.Sprite):
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self,file,paddle):
+    def __init__(self,file,blocks,paddle):
         pygame.sprite.Sprite.__init__(self)
         self.image=pygame.image.load(file).convert_alpha()
         self.image=pygame.transform.scale(self.image,(25,25))
         self.rect=self.image.get_rect()
+        self.blocks=blocks
         self.paddle=paddle
         self.update=self.start
-        self.rect.bottom=paddle.rect.top
+        self.dx=0
+        self.dy=-10
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
     def start(self):
         self.rect.centerx=self.paddle.rect.centerx
+        self.rect.bottom=self.paddle.rect.top
+
         
     def change(self):
         self.update=self.move
 
     def move(self):
-        self.rect.centery=SCREEN.top
+        self.rect.centerx+=self.dx
+        self.rect.centery+=self.dy
+
+        if self.rect.left<SCREEN.left:
+            self.rect.left=SCREEN.left
+            self.dx=-self.dx
+            self.dy=-self.dy
+        if self.rect.top<SCREEN.top:
+            self.rect.top=SCREEN.top
+            self.dx=-self.dx
+            self.dy=-self.dy
+        if self.rect.right>SCREEN.right:
+            self.rect.right=SCREEN.right
+            self.dx=-self.dx
+            self.dy=-self.dy
+        if self.rect.bottom>SCREEN.bottom:
+            self.update=self.start
+
+        
+
+        self.rect.clamp_ip(SCREEN)
 
 
 
@@ -69,14 +93,20 @@ def main():
     screen = pygame.display.set_mode(SCREEN.size)
     screen.fill((0,0,0))
 
+    clock = pygame.time.Clock()
+
     blocks=pygame.sprite.Group()
     for ball_x in range(8):
         for ball_y in range(4):
             block=Block('block.png',ball_x,ball_y)
             blocks.add(block)
     paddle=Paddle('paddle.png')
-    ball=Ball('ball.png',paddle)
+    ball=Ball('ball.png',blocks,paddle)
+
     while True:
+
+        clock.tick(60)
+
         screen.fill((0,0,0))
         paddle.move()
         ball.update()
