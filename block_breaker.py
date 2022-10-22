@@ -1,3 +1,4 @@
+import random
 import pygame
 from pygame.locals import *
 import sys
@@ -29,7 +30,7 @@ class Ball(pygame.sprite.Sprite):
         self.blocks=blocks
         self.paddle=paddle
         self.update=self.start
-        self.dx=0
+        self.dx=random.uniform(-10,10)
         self.dy=-10
 
     def draw(self, screen):
@@ -50,19 +51,20 @@ class Ball(pygame.sprite.Sprite):
         if self.rect.left<SCREEN.left:
             self.rect.left=SCREEN.left
             self.dx=-self.dx
-            self.dy=-self.dy
         if self.rect.top<SCREEN.top:
             self.rect.top=SCREEN.top
-            self.dx=-self.dx
             self.dy=-self.dy
         if self.rect.right>SCREEN.right:
             self.rect.right=SCREEN.right
             self.dx=-self.dx
+        
+        if self.rect.colliderect(self.paddle.rect):
             self.dy=-self.dy
+            self.rect.bottom=self.paddle.rect.top-1
+        
         if self.rect.bottom>SCREEN.bottom:
             self.update=self.start
 
-        
 
         self.rect.clamp_ip(SCREEN)
 
